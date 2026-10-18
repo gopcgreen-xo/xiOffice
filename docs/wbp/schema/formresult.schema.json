@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:formresult",
+  "title": "WBP 离线填写结果（离线填写页导出的 .json）",
+  "type": "object",
+  "required": ["v", "form", "records"],
+  "properties": {
+    "v": { "const": 1 },
+    "form": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+    "pack": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" },
+    "records": {
+      "type": "array",
+      "maxItems": 5000,
+      "items": { "type": "object", "additionalProperties": { "type": "string" } }
+    }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false
+}

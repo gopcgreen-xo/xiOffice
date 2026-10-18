@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:form",
+  "title": "WBP 表单 forms/<表单id>.json",
+  "type": "object",
+  "required": ["id", "title", "target", "fields"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+    "title": { "type": "string", "maxLength": 100 },
+    "target": {
+      "type": "object",
+      "required": ["item", "sheet"],
+      "properties": {
+        "item": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+        "sheet": { "type": "string", "minLength": 1, "maxLength": 100 }
+      },
+      "additionalProperties": false
+    },
+    "fields": { "type": "array", "maxItems": 500, "items": { "$ref": "#/$defs/field" } },
+    "after": { "enum": ["continue", "close"] },
+    "onSubmit": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+    "onValidate": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false,
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["column"],
+      "properties": {
+        "column": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+        "label": { "type": "string", "maxLength": 100 },
+        "hint": { "type": "string", "maxLength": 300 },
+        "hidden": { "type": "boolean" },
+        "auto": { "enum": ["now", "user", "autonum"] },
+        "keep": { "type": "boolean" }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    }
+  }
+}

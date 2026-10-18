@@ -1,0 +1,39 @@
+{
+  "name": "xioffice",
+  "private": true,
+  "version": "0.1.0",
+  "description": "在浏览器里运行的 Word / Excel 编辑器（docx、xlsx 读写，纯前端）",
+  "type": "module",
+  "workspaces": [
+    "editors/*"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev:word": "vite --config editors/word/dev/vite.config.ts",
+    "dev:sheet": "vite --config editors/sheet/dev/vite.config.ts",
+    "gen:sample": "cross-env GEN_SAMPLE=1 vitest run editors/word/src/core/sample.test.ts"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@xmldom/xmldom": "^0.8.11",
+    "cross-env": "^7.0.3",
+    "jsdom": "^25.0.1",
+    "pdfjs-dist": "^4.10.38",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
+  }
+}

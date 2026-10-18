@@ -1,0 +1,10 @@
+{
+  "name": "@wz/editor-shared",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --root ../.. --passWithNoTests editors/shared/"
+  }
+}

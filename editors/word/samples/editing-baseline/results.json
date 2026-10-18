@@ -1,0 +1,86 @@
+[
+  {
+    "case": "body-table-body",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 2,
+    "end": 31,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "be\rter\r\r",
+    "tables": 0,
+    "error": null
+  },
+  {
+    "case": "body-table-body-type",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Selection.TypeText",
+    "start": 2,
+    "end": 31,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "beXter\r\r",
+    "tables": 0,
+    "error": null
+  },
+  {
+    "case": "body-to-cell",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 2,
+    "end": 9,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "tables": 1,
+    "error": "无法编辑 Range。"
+  },
+  {
+    "case": "cell-to-body",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 25,
+    "end": 31,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "tables": 1,
+    "error": "无法编辑 Range。"
+  },
+  {
+    "case": "partial-cells",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 9,
+    "end": 14,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "tables": 1,
+    "error": "无法编辑 Range。"
+  },
+  {
+    "case": "whole-cells",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 7,
+    "end": 17,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "before\r\r\u0007\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "tables": 1,
+    "error": null
+  },
+  {
+    "case": "whole-table",
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266",
+    "operation": "Range.Delete",
+    "start": 7,
+    "end": 29,
+    "before": "before\rABCD\r\u0007EFGH\r\u0007\r\u0007IJKL\r\u0007MNOP\r\u0007\r\u0007after\r\r",
+    "after": "before\r\r\u0007\r\u0007\r\u0007\r\u0007\r\u0007\r\u0007after\r\r",
+    "tables": 1,
+    "error": null
+  }
+]

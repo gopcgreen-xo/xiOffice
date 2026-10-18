@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:columns",
+  "title": "WBP 列属性 meta/<条目id>.columns.json",
+  "type": "object",
+  "required": ["v", "sheets"],
+  "properties": {
+    "v": { "const": 1 },
+    "sheets": {
+      "type": "object",
+      "propertyNames": { "maxLength": 100 },
+      "additionalProperties": { "$ref": "#/$defs/sheet" }
+    }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false,
+  "$defs": {
+    "sheet": {
+      "type": "object",
+      "required": ["header", "columns"],
+      "properties": {
+        "header": { "type": "integer", "minimum": 1 },
+        "columns": { "type": "array", "maxItems": 2000, "items": { "$ref": "#/$defs/column" } }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    },
+    "column": {
+      "type": "object",
+      "required": ["id", "title", "col", "type"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+        "title": { "type": "string", "maxLength": 200 },
+        "col": { "type": "integer", "minimum": 0, "maximum": 16383 },
+        "type": { "enum": ["text", "number", "money", "percent", "date", "select", "multi", "check", "link", "email", "phone", "autonum", "created"] },
+        "options": { "type": "array", "maxItems": 200, "items": { "$ref": "#/$defs/option" } },
+        "required": { "type": "boolean" },
+        "default": { "type": "string", "maxLength": 500 },
+        "fmt": { "type": "string", "maxLength": 100 },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "integer": { "type": "boolean" },
+        "note": { "type": "string", "maxLength": 300 },
+        "onInvalid": { "enum": ["stop", "warn", "info"] },
+        "optionsRef": { "type": "string", "minLength": 1, "maxLength": 200 }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    },
+    "option": {
+      "type": "object",
+      "required": ["v"],
+      "properties": {
+        "v": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    }
+  }
+}

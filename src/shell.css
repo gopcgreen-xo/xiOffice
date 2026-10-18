@@ -1,0 +1,170 @@
+/* 壳子自己的样式；标签栏、按钮、提示沿用 styles/app.css */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+#root {
+  display: flex;
+}
+.xo-app {
+  position: relative;
+}
+.xo-brand {
+  align-self: center;
+  border: none;
+  background: none;
+  padding: 0 10px 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-text);
+  cursor: pointer;
+}
+.xo-actions {
+  align-self: center;
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.xo-badge {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #2b579a;
+}
+.xo-badge.sheet {
+  background: #217346;
+}
+.xo-badge.open {
+  background: var(--accent);
+}
+.xo-badge.big {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 22px;
+}
+.xo-loading {
+  margin: auto;
+  color: var(--sub);
+}
+.xo-home {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+.xo-home h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+.xo-home h2 {
+  margin: 36px 0 12px;
+  font-size: 16px;
+}
+.xo-sub {
+  color: var(--sub);
+  font-size: 13px;
+}
+.xo-cards {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+.xo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.xo-card:hover {
+  border-color: var(--accent);
+  background: var(--hover);
+}
+.xo-card strong {
+  font-size: 15px;
+}
+.xo-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.xo-note {
+  margin-top: 36px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--sub);
+}
+.xo-drop {
+  position: absolute;
+  inset: 8px;
+  z-index: 50;
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--accent-text);
+  pointer-events: none;
+}
+.xo-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--backdrop, rgba(0, 0, 0, 0.3));
+  display: grid;
+  place-items: center;
+}
+.xo-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.xo-dialog p {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+.xo-dialog input {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input);
+  color: var(--text);
+  font: inherit;
+}
+.xo-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
