@@ -1,0 +1,32 @@
+{
+  "name": "@wz/word",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --root ../.. editors/word/"
+  },
+  "wz": {
+    "kind": "word",
+    "label": "Word",
+    "exts": [
+      "docx",
+      "doc",
+      "dot"
+    ],
+    "order": 1,
+    "tag": "DOC",
+    "openName": "打开 Word 文档",
+    "create": {
+      "name": "新建 Word 文档",
+      "title": "新建文档.docx"
+    }
+  },
+  "dependencies": {
+    "cfb": "^1.2.2",
+    "fast-xml-parser": "^5.11.2",
+    "jszip": "^3.10.2",
+    "utif2": "^4.1.0"
+  }
+}

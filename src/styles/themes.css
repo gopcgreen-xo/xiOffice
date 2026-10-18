@@ -1,0 +1,109 @@
+/* 五套主题色板，与设计画布「五套主题」一致 */
+:root,
+[data-theme='blue'] {
+  --bg: #f7fafd;
+  --side: #ebf2fa;
+  --title: #e3edf8;
+  --card: #ffffff;
+  --input: #e2ebf5;
+  --border: #d3e0ee;
+  --text: #0f2438;
+  --sub: #475e75;
+  --hover: #dde9f6;
+  --accent: #0b5cad;
+  --accent-text: #0a559f;
+  --soft: #d7e7f8;
+  --viewer: #e9f0f8;
+  --backdrop: rgba(10, 30, 55, 0.32);
+  color-scheme: light;
+}
+
+[data-theme='light'] {
+  --bg: #ffffff;
+  --side: #f9fbff;
+  --title: #f9fbff;
+  --card: #ffffff;
+  --input: #f1f3f7;
+  --border: #e3e7ee;
+  --text: #1f2329;
+  --sub: #5c6370;
+  --hover: #eef2fa;
+  --accent: #3f5ef0;
+  --accent-text: #3552e0;
+  --soft: #e9edff;
+  --viewer: #f3f5f9;
+  --backdrop: rgba(20, 24, 33, 0.32);
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #292a2d;
+  --side: #212327;
+  --title: #1c1d20;
+  --card: #303135;
+  --input: #37383c;
+  --border: #3d3f44;
+  --text: #ecedef;
+  --sub: #a7aab2;
+  --hover: #34363b;
+  --accent: #3f5ef0;
+  --accent-text: #9aabff;
+  --soft: #2f3656;
+  --viewer: #1b1c1f;
+  --backdrop: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+[data-theme='orange'] {
+  --bg: #fffbf7;
+  --side: #fff4ea;
+  --title: #fff4ea;
+  --card: #ffffff;
+  --input: #fbeee2;
+  --border: #f1e0cf;
+  --text: #2a1c12;
+  --sub: #735646;
+  --hover: #fce8d7;
+  --accent: #c2410c;
+  --accent-text: #b03b0a;
+  --soft: #ffe6d2;
+  --viewer: #f8eee4;
+  --backdrop: rgba(42, 28, 18, 0.32);
+  color-scheme: light;
+}
+
+[data-theme='green'] {
+  --bg: #f7fbf8;
+  --side: #ebf5ef;
+  --title: #e4f1e9;
+  --card: #ffffff;
+  --input: #e1eee6;
+  --border: #d2e5d9;
+  --text: #10271b;
+  --sub: #476153;
+  --hover: #ddefe4;
+  --accent: #0f7a56;
+  --accent-text: #0d6f4e;
+  --soft: #d6eee0;
+  --viewer: #e7f1eb;
+  --backdrop: rgba(10, 40, 25, 0.32);
+  color-scheme: light;
+}
+
+/* 优先级色 */
+:root {
+  --p-high-bg: #fde8e7;
+  --p-high-fg: #b42318;
+  --p-mid-bg: #fdf1dc;
+  --p-mid-fg: #95570b;
+  --p-low-bg: #e6f4ec;
+  --p-low-fg: #1d6b45;
+}
+[data-theme='dark'] {
+  --p-high-bg: #4a2626;
+  --p-high-fg: #ff9c94;
+  --p-mid-bg: #4a3a20;
+  --p-mid-fg: #f5c77a;
+  --p-low-bg: #2e3b33;
+  --p-low-fg: #9fd3b3;
+}

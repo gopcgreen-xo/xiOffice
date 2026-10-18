@@ -1,0 +1,20 @@
+xiOffice — 第三方源码说明
+
+GenOffice docx-engine
+Copyright 2026 Mainfunc, Inc.
+Licensed under the Apache License, Version 2.0.
+https://github.com/genspark-ai/genoffice
+
+editors/word/vendor/docx-engine, editors/word/vendor/zip-gate and
+editors/word/vendor/pptx-engine are derived from GenOffice (commit db347087).
+Changes are listed in editors/word/vendor/README.md. The license text is
+editors/word/vendor/docx-engine/LICENSE (NOTICE alongside it).
+
+emf-converter (EMF / WMF to image)
+
+editors/word/vendor/docx-engine/src/vendor/emf-converter is emf-converter 2.0.2
+(https://github.com/ChristopherVR/emf-converter, Apache License 2.0) with local
+fixes made by GenOffice; see its README.md and LICENSE.
+
+npm dependencies (React, fflate, pdf-lib, jszip, cfb, fast-xml-parser, utif2 …)
+are distributed under their own licenses; see each package in node_modules.

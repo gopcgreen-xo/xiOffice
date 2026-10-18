@@ -1,0 +1,1937 @@
+/* 表格查看器（SheetViewer）：科技风，颜色全部来自主题变量（themes.css） */
+.sheet {
+  /* 网格线：与 Excel 相近（白底约 #d4d4d4），由文字色混入底色得到，暗色主题同样清楚 */
+  --sheet-grid: color-mix(in srgb, var(--text) 18%, var(--card));
+  /* 行号列标：与 Excel 相同的浅灰底、较深的分隔线；选中时加深底色 */
+  --sheet-head: color-mix(in srgb, var(--text) 5%, var(--card));
+  --sheet-head-line: color-mix(in srgb, var(--text) 27%, var(--card));
+  --sheet-head-text: color-mix(in srgb, var(--text) 72%, var(--card));
+  --sheet-head-on: color-mix(in srgb, var(--text) 16%, var(--card));
+  /* 选区色：Excel 绿；选区内的浅灰底 */
+  --sheet-sel: #217346;
+  --sheet-range: color-mix(in srgb, var(--text) 9%, var(--card));
+  --sheet-glow: color-mix(in srgb, var(--accent) 38%, transparent);
+  --sheet-tint: color-mix(in srgb, var(--accent) 10%, transparent);
+  --sheet-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+}
+/* 暗色主题下用更亮的绿，保证对比度 */
+[data-theme='dark'] .sheet {
+  --sheet-sel: #3fb574;
+}
+/* 骨架屏之后的表格淡入；首次读取未超时时显示同色空白底 */
+.sheet.enter {
+  animation: sheet-fade 0.18s ease-out;
+}
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+.sheet-blank {
+  flex: 1;
+  background: var(--card);
+}
+.sheet-spin svg {
+  animation: spin 0.8s linear infinite;
+}
+.sheet-bar {
+  gap: 8px;
+  background: color-mix(in srgb, var(--card) 78%, transparent);
+  backdrop-filter: blur(12px) saturate(1.4);
+  position: relative;
+}
+/* 工具栏底部一条渐隐的强调色光带 */
+.sheet-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent) 30%, var(--accent) 70%, transparent);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.sheet-bar .btn.on {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.sheet-addr {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--accent-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sheet-addr:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--sheet-glow);
+}
+.sheet-addr input {
+  width: 92px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: 600 12px var(--sheet-mono);
+  letter-spacing: 0.04em;
+}
+.sheet-addr svg {
+  opacity: 0.6;
+}
+.sheet-fx {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--accent-text);
+  opacity: 0.8;
+}
+.sheet-formula {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  min-width: 80px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--sheet-grid);
+  background: color-mix(in srgb, var(--input) 45%, transparent);
+  font-size: 13px;
+  color: var(--text);
+}
+.sheet-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--sub);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sheet-search:focus-within,
+.sheet-search.has {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--sheet-glow);
+  color: var(--accent-text);
+}
+.sheet-search input {
+  width: 120px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+.sheet-search-count {
+  font-size: 11px;
+  color: var(--accent-text);
+}
+.sheet-zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.sheet-zoom-val {
+  min-width: 44px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sub);
+  font: 12px var(--sheet-mono);
+}
+.sheet-zoom-val:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.sheet-scroll {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 35%, var(--border)) transparent;
+}
+.sheet-view {
+  position: sticky;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  outline: none;
+  user-select: none;
+  cursor: cell;
+  font-size: var(--sheet-font, 13px);
+  color: var(--text);
+}
+.sheet-zone {
+  position: absolute;
+  overflow: hidden;
+}
+.sc {
+  position: absolute;
+  display: flex;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--sheet-grid);
+  border-bottom: 1px solid var(--sheet-grid);
+  background: var(--card);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sc > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.sc.num {
+  font-variant-numeric: tabular-nums;
+}
+.sc.bold {
+  font-weight: 600;
+}
+.sc.italic {
+  font-style: italic;
+}
+.sc.wrap {
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.35;
+}
+.sc.merged {
+  z-index: 1;
+}
+/* 单元格边框（文件里设置的），压在网格线上，盖过相邻格子的底色 */
+.sheet-border {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.sc.hit {
+  background: color-mix(in srgb, #f5b400 22%, var(--card));
+}
+.sc.hit.on {
+  background: color-mix(in srgb, #f5b400 55%, var(--card));
+}
+.sc.in-sel {
+  background: var(--sheet-range);
+}
+/* 选区框 / 活动单元格框：Excel 绿实线，无光晕；由 boxOf 压在网格线上 */
+.sheet-sel,
+.sheet-active {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid var(--sheet-sel);
+  transition: left 60ms, top 60ms, width 60ms, height 60ms;
+}
+/* 右下角的填充柄小方块 */
+.sheet-sel::after,
+.sheet-active::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 5px;
+  height: 5px;
+  background: var(--sheet-sel);
+  border: 1px solid var(--card);
+}
+/* 复制后的扫描线 */
+.sheet-sel.flash::before,
+.sheet-active.flash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sheet-sel) 35%, transparent), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: sheet-scan 0.6s ease-out forwards;
+}
+@keyframes sheet-scan {
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+.sheet-zone.head {
+  z-index: 4;
+  background: var(--sheet-head);
+}
+.sh {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-right: 1px solid var(--sheet-head-line);
+  border-bottom: 1px solid var(--sheet-head-line);
+  font-size: calc(var(--sheet-font, 13px) - 1px);
+  color: var(--sheet-head-text);
+}
+.sh.col {
+  /* 和 Excel 一样：列标上是向下的黑色粗箭头，行号上是向右的黑色粗箭头 */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6.5 1.5h3v7h3.5L8 14.5 3 8.5h3.5z' fill='black' stroke='white' stroke-linejoin='round'/%3E%3C/svg%3E") 8 14, s-resize;
+}
+.sh.row {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M1.5 6.5v3h7v3.5L14.5 8 8.5 3v3.5z' fill='black' stroke='white' stroke-linejoin='round'/%3E%3C/svg%3E") 14 8, e-resize;
+}
+/* 鼠标在两列 / 两行之间的分隔线上：拖动调整列宽 / 行高 */
+.sheet-view.resize-col,
+.sheet-view.resize-col .sh {
+  cursor: col-resize;
+}
+.sheet-view.resize-row,
+.sheet-view.resize-row .sh {
+  cursor: row-resize;
+}
+.sheet-resize-tip {
+  position: absolute;
+  z-index: 8;
+  padding: 2px 6px;
+  border: 1px solid var(--sheet-head-line);
+  border-radius: 3px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--card);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--text) 18%, transparent);
+  pointer-events: none;
+}
+/* 选中的行号 / 列标：加深底色、文字和靠近表格一侧的边线变成选区色，与选区框接成一条线 */
+.sh.on {
+  color: var(--sheet-sel);
+  font-weight: 600;
+  background: var(--sheet-head-on);
+}
+.sh.col.on {
+  border-bottom-color: var(--sheet-sel);
+}
+.sh.row.on {
+  border-right-color: var(--sheet-sel);
+}
+/* 分组栏（行号左边 / 列标上边）和折叠按钮 */
+.sheet-zone.og {
+  z-index: 4;
+  background: var(--sheet-head);
+  border-right: 1px solid var(--sheet-head-line);
+  border-bottom: 1px solid var(--sheet-head-line);
+  box-sizing: border-box;
+}
+.og-bar {
+  position: absolute;
+  background: color-mix(in srgb, var(--text) 55%, var(--card));
+}
+.og-bar.row {
+  width: 1px;
+}
+.og-bar.col {
+  height: 1px;
+}
+.og-btn {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--text) 55%, var(--card));
+  border-radius: 1px;
+  cursor: pointer;
+}
+.og-btn:hover {
+  background: var(--sheet-head-on);
+}
+.og-btn.lv {
+  width: 12px;
+  height: 12px;
+}
+.og-corner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.og-corner > * {
+  pointer-events: auto;
+}
+.sheet-corner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  background: var(--sheet-head);
+  border-right: 1px solid var(--sheet-head-line);
+  border-bottom: 1px solid var(--sheet-head-line);
+  cursor: pointer;
+}
+.sheet-corner::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  border: 5px solid transparent;
+  border-right-color: color-mix(in srgb, var(--text) 30%, var(--card));
+  border-bottom-color: color-mix(in srgb, var(--text) 30%, var(--card));
+}
+/* 冻结线：与 Excel 一样是一条较深的灰线 */
+.sheet-freeze-h,
+.sheet-freeze-v {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--text) 45%, var(--card));
+}
+.sheet-freeze-h {
+  height: 1px;
+}
+.sheet-freeze-v {
+  width: 1px;
+}
+.sheet-copied {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  color: var(--accent-text);
+  background: color-mix(in srgb, var(--card) 80%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 6px 20px var(--sheet-glow);
+  animation: sheet-pop 0.2s ease-out;
+  pointer-events: none;
+}
+@keyframes sheet-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+.sheet-foot {
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+  border-top: 1px solid var(--border);
+  background: var(--sheet-head);
+}
+.sheet-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sheet-tab {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--sub);
+  font-size: 12px;
+  transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.sheet-tab:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.sheet-tab .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.6;
+}
+.sheet-tab.on {
+  color: var(--accent-text);
+  font-weight: 600;
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: 0 0 10px var(--sheet-glow);
+}
+.sheet-tab.on .dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+  box-shadow: 0 0 6px var(--accent);
+}
+.sheet-hud {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11.5px;
+}
+.sheet-hud-item {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  cursor: copy;
+}
+.sheet-hud-item:hover {
+  background: var(--sheet-tint);
+}
+.sheet-hud-item .k {
+  color: var(--sub);
+  font-size: 11px;
+}
+.sheet-hud-item .v {
+  color: var(--accent-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-detail-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--backdrop);
+}
+.sheet-detail {
+  width: min(560px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25), 0 0 24px var(--sheet-glow);
+  animation: sheet-pop 0.18s ease-out;
+}
+.sheet-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.sheet-detail-addr {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.sheet-detail textarea {
+  min-height: 140px;
+  max-height: 50vh;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  outline: none;
+}
+.sheet-detail textarea:focus {
+  border-color: var(--accent);
+}
+.sheet-detail-raw {
+  font-size: 12px;
+  word-break: break-all;
+}
+.sheet-detail-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sheet-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--viewer);
+}
+.sheet-state-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+  padding: 24px 28px;
+  border-radius: 14px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+.sheet-state-card strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+/* 读取中：像一张空白工作表，行号列标 + 网格线，不做闪烁动画 */
+.sheet-loading {
+  position: relative;
+  overflow: hidden;
+}
+.sheet-loading-grid {
+  position: absolute;
+  inset: 0;
+  /* 网格线在上：列宽 64px（行号列 40px 之后开始），行高 24px；再往下是灰色的列标行 / 行号列 */
+  background:
+    repeating-linear-gradient(90deg, var(--sheet-grid) 0 1px, transparent 1px 64px) 39px 0 / 100% 100% no-repeat,
+    repeating-linear-gradient(var(--sheet-grid) 0 1px, transparent 1px 24px) 0 23px / 100% 100% no-repeat,
+    linear-gradient(var(--sheet-head), var(--sheet-head)) 0 0 / 100% 24px no-repeat,
+    linear-gradient(var(--sheet-head), var(--sheet-head)) 0 0 / 40px 100% no-repeat,
+    var(--card);
+  opacity: 0.55;
+}
+/* 顶部细进度条：来回滑动的一小段 */
+.sheet-loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 2;
+  overflow: hidden;
+}
+.sheet-loading-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  background: var(--sheet-sel);
+  animation: sheet-bar-slide 1.2s ease-in-out infinite;
+}
+@keyframes sheet-bar-slide {
+  from {
+    left: -30%;
+  }
+  to {
+    left: 100%;
+  }
+}
+.sheet-loading-card {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(460px, calc(100% - 32px));
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  animation: sheet-fade 0.2s ease-out;
+}
+.sheet-loading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+}
+.sheet-loading-text .sub {
+  font-size: 12px;
+}
+.sheet-loading-spin {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--sheet-grid);
+  border-top-color: var(--sheet-sel);
+  animation: spin 0.8s linear infinite;
+}
+
+/* 冻结按钮的下拉箭头 / 菜单 */
+.sheet-caret {
+  transform: rotate(90deg);
+  opacity: 0.8;
+}
+.sheet-caret path { stroke-width: 2.4; }
+.ctx-menu .ctx-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+.ctx-menu button:disabled {
+  opacity: 0.45;
+  background: transparent;
+}
+.ctx-menu button.on {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* “用 Excel 打开”：Excel 绿（错误页在 .sheet 之外，没有 --sheet-sel，所以这里自己定） */
+.btn.sheet-excel-btn {
+  --excel: var(--sheet-sel, #217346);
+  color: var(--excel);
+  border-color: color-mix(in srgb, var(--excel) 45%, var(--border));
+  background: color-mix(in srgb, var(--excel) 8%, var(--card));
+  font-weight: 500;
+}
+[data-theme='dark'] .btn.sheet-excel-btn {
+  --excel: #3fb574;
+}
+.btn.sheet-excel-btn:hover {
+  background: color-mix(in srgb, var(--excel) 16%, var(--card));
+  border-color: var(--excel);
+}
+
+/* ---------- 编辑 ---------- */
+/* 编辑栏：名称框 + fx + 可编辑的内容 */
+.sheet-fbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.sheet-fbar .sheet-fx {
+  line-height: 28px;
+}
+textarea.sheet-formula {
+  display: block;
+  resize: none;
+  height: 28px;
+  min-height: 28px;
+  max-height: 140px;
+  padding: 4px 10px;
+  line-height: 18px;
+  font-family: inherit;
+  outline: none;
+  overflow: hidden;
+  white-space: pre;
+}
+textarea.sheet-formula:focus {
+  height: auto;
+  field-sizing: content;
+  overflow: auto;
+  white-space: pre-wrap;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--sheet-glow);
+}
+/* 单元格编辑框：平时是隐藏的键盘焦点（接收打字和输入法），编辑时盖在格子上 */
+.sheet-editor {
+  position: absolute;
+  z-index: 6;
+  width: 2px;
+  height: 2px;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  opacity: 0;
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  pointer-events: none;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+}
+.sheet-editor.on {
+  opacity: 1;
+  width: auto;
+  height: auto;
+  field-sizing: content;
+  box-sizing: border-box;
+  padding: 2px 5px;
+  border: 2px solid var(--sheet-sel);
+  background: var(--card);
+  color: var(--text);
+  caret-color: var(--text);
+  font: inherit;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-all;
+  pointer-events: auto;
+  cursor: text;
+  user-select: text;
+  box-shadow: 0 2px 10px color-mix(in srgb, #000 18%, transparent);
+}
+.sheet-editor.mirror {
+  pointer-events: none;
+  caret-color: transparent;
+}
+.sheet-active.editing,
+.sheet-sel.editing {
+  opacity: 0;
+}
+/* 多格选区里的活动单元格：细框 */
+.sheet-active-in {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 1px solid var(--sheet-sel);
+}
+/* 复制 / 剪切后的虚线框（蚂蚁线） */
+.sheet-marquee {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px dashed var(--sheet-sel);
+  animation: sheet-ants 0.6s linear infinite;
+}
+@keyframes sheet-ants {
+  50% {
+    border-color: color-mix(in srgb, var(--sheet-sel) 45%, var(--card));
+  }
+}
+/* 拖动填充柄时的目标区域 */
+.sheet-fill-preview {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 1px dashed var(--text);
+}
+.sheet-view.resize-fill,
+.sheet-view.resize-fill .sc {
+  cursor: crosshair;
+}
+.sh.col.full,
+.sh.row.full {
+  background: color-mix(in srgb, var(--sheet-sel) 22%, var(--sheet-head));
+}
+/* 提示条（不能编辑的内容、外部修改） */
+.sheet-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  background: var(--p-mid-bg);
+  color: var(--p-mid-fg);
+  font-size: 12px;
+}
+.sheet-note .btn {
+  height: 24px;
+  font-size: 12px;
+}
+.ctx-menu.sheet-menu {
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+}
+/* 编辑公式时被引用的区域 */
+.sheet-refbox {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 2px solid;
+}
+/* 编辑器不能计算的公式：左上角小三角 */
+.sc.fx-na::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-style: solid;
+  border-width: 5px 5px 0 0;
+  border-color: #c98a00 transparent transparent transparent;
+}
+
+/* ---------- 格式工具栏 ---------- */
+.sheet-fmtbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.sheet-fmtbar .sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 6px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.sheet-fmtbar .icon-btn.fmt {
+  font-size: 14px;
+  color: var(--text);
+}
+.sheet-fmtbar .icon-btn.on {
+  background: var(--soft);
+  color: var(--accent-text);
+}
+/* 拆分按钮：左边执行上次的选择，右边小箭头打开菜单 */
+.sheet-split {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.sheet-split:hover {
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.sheet-split .icon-btn.sheet-caret-btn {
+  width: 18px;
+}
+.sheet-color-a {
+  font-weight: 700;
+  line-height: 1;
+  border-bottom: 3px solid;
+  padding: 0 2px;
+}
+.sheet-merge-btn.btn {
+  height: 28px;
+  padding: 0 8px;
+  gap: 4px;
+  border-radius: 8px;
+  border-color: transparent;
+  background: transparent;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.sheet-dec {
+  font: 600 10px var(--sheet-mono, monospace);
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.sheet-fmtbar .icon-btn:has(.sheet-dec) {
+  width: 40px;
+}
+.ctx-menu.sheet-dropdown button svg {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+/* 调色板 */
+.sheet-palette {
+  padding: 4px 2px;
+  width: 232px;
+}
+.sheet-palette-label {
+  margin: 8px 6px 4px;
+  font-size: 12px;
+  color: var(--sub);
+}
+.sheet-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 18px);
+  gap: 3px 4px;
+  padding: 0 6px;
+}
+.ctx-menu .sheet-palette-grid button.swatch {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+}
+.ctx-menu .sheet-palette-grid button.swatch:hover {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.sheet-palette .swatch.first {
+  margin-bottom: 4px;
+}
+.ctx-menu .sheet-palette-wide {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+}
+.sheet-palette-wide .swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+.sheet-palette-wide .swatch.none {
+  background: linear-gradient(135deg, transparent 45%, #d33 45%, #d33 55%, transparent 55%), var(--card);
+}
+.sheet-palette-wide input[type='color'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+/* 格式刷模式 */
+.sheet-view.painting,
+.sheet-view.painting .sc {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M3 2h9v4H3zM12 4h2v4H7v3' fill='white' stroke='black'/%3E%3Crect x='5.5' y='11' width='3' height='6' fill='black'/%3E%3C/svg%3E") 7 18, copy;
+}
+.ctx-menu label.sheet-palette-wide {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.ctx-menu label.sheet-palette-wide:hover {
+  background: var(--hover);
+}
+
+/* ---------- 工作表标签 / 排序 / 筛选 ---------- */
+.sheet-tab .dot.color {
+  background: var(--tab-color);
+  border-color: var(--tab-color);
+  opacity: 1;
+  width: 8px;
+  height: 8px;
+}
+.sheet-tab[style*='--tab-color'] {
+  box-shadow: inset 0 -2px 0 var(--tab-color);
+}
+.sheet-tab.drop {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.sheet-tab-input {
+  flex-shrink: 0;
+  width: 120px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  border: 1px solid var(--accent);
+  background: var(--input);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+}
+.sheet-tab-add.icon-btn {
+  width: 26px;
+  height: 26px;
+}
+/* 筛选按钮：标题行格子右下角 */
+.sheet-filter-btn {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 30%, var(--card));
+  border-radius: 3px;
+  background: var(--card);
+  color: var(--sub);
+  cursor: pointer;
+}
+.sheet-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.sheet-filter-btn.on {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--soft);
+}
+.ctx-menu.sheet-filter {
+  width: 270px;
+  padding-bottom: 8px;
+}
+.sheet-filter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 2px 6px 6px;
+}
+.ctx-menu .sheet-filter-tabs button {
+  flex: 1;
+  height: 28px;
+  justify-content: center;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+.ctx-menu .sheet-filter-tabs button.on {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: var(--soft);
+}
+.sheet-filter-search,
+.sheet-filter-custom input {
+  width: calc(100% - 12px);
+  margin: 0 6px 6px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  box-sizing: border-box;
+}
+.sheet-filter-search:focus,
+.sheet-filter-custom input:focus {
+  border-color: var(--accent);
+}
+.sheet-filter-list {
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0 6px;
+  padding: 4px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.sheet-filter-list label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.sheet-filter-list label:hover {
+  background: var(--hover);
+}
+.sheet-filter-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 6px;
+}
+.sheet-filter-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px 0;
+}
+.sheet-filter-foot .btn,
+.sheet-sort .btn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+.ctx-menu .sheet-filter-foot button {
+  width: auto;
+}
+/* 菜单里按钮悬停会换成 --hover 浅底，主按钮要保持强调色（否则白字看不清） */
+.ctx-menu .btn.primary,
+.ctx-menu .btn.primary:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.ctx-menu .btn.primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.sheet-sort {
+  width: 460px;
+}
+.sheet-sort-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+.sheet-sort-row > .sub {
+  width: 72px;
+  font-size: 12px;
+}
+.sheet-sort-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.sheet { position: relative; }
+
+/* ---------- 打印 ---------- */
+.sheet-detail.sheet-print {
+  width: min(860px, calc(100vw - 48px));
+}
+.sheet-print-body {
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+}
+.sheet-print-form {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+}
+.sheet-print-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sheet-print-form label.sheet-print-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.sheet-print-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: -4px;
+}
+.sheet-print-btns .btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.sheet-print-preview {
+  flex: 1;
+  height: 460px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text) 8%, var(--card));
+}
+.sheet-print-preview figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.sheet-print-preview img {
+  width: 160px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: #fff;
+}
+
+/* ---------- 函数提示 ---------- */
+.sheet-hint {
+  position: absolute;
+  z-index: 8;
+  min-width: 220px;
+  max-width: 460px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+}
+.sheet-hint button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 12px;
+}
+.sheet-hint button.on,
+.sheet-hint button:hover {
+  background: var(--soft);
+}
+.sheet-hint button .mono {
+  min-width: 96px;
+  font-weight: 600;
+}
+.sheet-hint-sig {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+}
+.sheet-hint-sig .cur {
+  font-weight: 700;
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+/* 不连续选区里的其它区域 */
+.sheet-sel-extra {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  border: 1px solid var(--sheet-sel);
+}
+/* 条件格式的数据条：格子左边一条渐变色 */
+.sheet-databar {
+  position: absolute;
+  left: 1px;
+  top: 3px;
+  bottom: 3px;
+  pointer-events: none;
+  border-radius: 1px;
+}
+.sc > span {
+  position: relative;
+}
+/* 数据验证：下拉箭头、列表、输入提示 */
+.sheet-dv-btn {
+  position: absolute;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 30%, var(--card));
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.sheet-dv-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+.sheet-dv-prompt {
+  position: absolute;
+  z-index: 7;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid #c9b458;
+  background: #fffbe0;
+  color: #333;
+  font-size: 12px;
+  pointer-events: none;
+}
+/* 图片和图表：盖在格子上，不挡鼠标 */
+.sheet-drawing {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  object-fit: fill;
+}
+.sheet-chart {
+  display: block;
+  font-family: inherit;
+}
+/* 批注（笔记）：右上角红色三角 */
+.sc.has-note::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-style: solid;
+  border-width: 0 6px 6px 0;
+  border-color: transparent #d00 transparent transparent;
+}
+
+/* 删除重复项 / 分列 */
+.sheet-data-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  max-height: 180px;
+  overflow: auto;
+  padding: 6px 0;
+}
+.sheet-data-cols label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sheet-data-preview {
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 6px 0;
+  max-width: 100%;
+}
+.sheet-data-preview td {
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  white-space: pre;
+}
+
+.sheet-print-margins {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 8px;
+}
+.sheet-print-margins > .sub {
+  grid-column: 1 / -1;
+}
+.sheet-print-margins label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sheet-print-margins input {
+  width: 100%;
+}
+
+.sheet-filter-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* 表格编辑器里的下拉框、输入框 */
+.sheet-fmtbar .ed-select {
+  height: 28px;
+  margin-right: 4px;
+}
+.sheet-filter-custom .ed-select,
+.sheet-filter-custom input {
+  width: 100%;
+  margin: 0;
+}
+.sheet-sort-row .ed-select {
+  flex: 1;
+}
+.sheet-sort-row .ed-select:nth-of-type(2) {
+  flex: 0 0 80px;
+}
+.sheet-print-form input:not([type='checkbox']) {
+  flex: 1;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+.sheet-print-form input:focus {
+  border-color: var(--accent);
+}
+.sheet-print-form .ed-select {
+  width: 100%;
+}
+
+/* 条件格式对话框 */
+.sheet-cf { width: 560px; max-width: 94vw; max-height: 86vh; overflow: auto; }
+.sheet-cf .sheet-sort-row .field { flex: 1; min-width: 0; }
+.sheet-cf-check { display: inline-flex; align-items: center; gap: 4px; }
+.sheet-cf-demo { padding: 2px 10px; border: 1px solid var(--border); border-radius: 4px; }
+.sheet-cf-swatches { display: inline-flex; gap: 2px; }
+.sheet-cf-sw { width: 22px; height: 14px; border: 1px solid var(--border); border-radius: 2px; }
+.sheet-cf-list { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+.sheet-cf-list-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.sheet-cf-rule { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 4px; }
+.sheet-cf-rule:hover { background: var(--hover); }
+
+/* 删除线按钮：abc 加一条横线（同 Word / Office） */
+.sheet .strike-ico { font-size: 12px; line-height: 1; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+
+.sheet-foot .sheet-zoom { flex-shrink: 0; margin-left: 8px; }
+
+/* 数据透视表对话框 */
+.pivot-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow: auto;
+  padding: 4px 0;
+}
+.pivot-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pivot-field .ed-select {
+  width: 96px;
+}
+
+/* 名称管理器 */
+.sheet-names {
+  width: 560px;
+}
+.names-list {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 6px 0;
+}
+.names-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.names-row:hover,
+.names-row.on {
+  background: var(--hover, color-mix(in srgb, var(--accent) 10%, transparent));
+}
+.names-name {
+  width: 120px;
+  font-weight: 600;
+}
+.names-scope {
+  width: 80px;
+  text-align: right;
+}
+.names-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+.names-form label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.names-form label > span:first-child {
+  width: 64px;
+  flex: none;
+}
+.names-form .input,
+.names-form .ed-select {
+  flex: 1;
+}
+.names-ref {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+.sheet-addr-list {
+  max-height: 260px;
+  overflow: auto;
+  min-width: 220px;
+}
+
+.sheet-lock {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: #9a5b00;
+  background: #fff1d6;
+  white-space: nowrap;
+}
+
+/* 选中的图片 / 图表：选择框和 8 个拖动点 */
+.sheet-drawing-sel {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  border: 1.5px solid var(--sheet-sel, #2b6cd9);
+  pointer-events: none;
+}
+.sheet-drawing-sel .dh {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: var(--card, #fff);
+  border: 1.5px solid var(--sheet-sel, #2b6cd9);
+  border-radius: 50%;
+  pointer-events: auto;
+}
+.dh-nw { left: -5px; top: -5px; cursor: nwse-resize; }
+.dh-n { left: calc(50% - 5px); top: -5px; cursor: ns-resize; }
+.dh-ne { right: -5px; top: -5px; cursor: nesw-resize; }
+.dh-e { right: -5px; top: calc(50% - 5px); cursor: ew-resize; }
+.dh-se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+.dh-s { left: calc(50% - 5px); bottom: -5px; cursor: ns-resize; }
+.dh-sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.dh-w { left: -5px; top: calc(50% - 5px); cursor: ew-resize; }
+/* 图表对话框 */
+.sheet-chart-dlg {
+  width: 520px;
+}
+.chart-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+}
+.chart-preview {
+  height: 254px;
+  margin: 6px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 右键菜单紧凑：行高 34px → 26px，分隔线上下留白也缩小（只影响表格编辑器的右键菜单） */
+.ctx-menu.sheet-menu {
+  padding: 4px;
+}
+.ctx-menu.sheet-menu > button {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.ctx-menu.sheet-menu > .ctx-sep {
+  margin: 3px 4px;
+}
+
+/* 设置单元格格式对话框 */
+.sheet-fmtdlg {
+  width: min(520px, calc(100vw - 48px));
+}
+.sheet-fmtdlg-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-fmtdlg-tabs button {
+  padding: 6px 14px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--sub);
+  font-size: 13px;
+  cursor: pointer;
+}
+.sheet-fmtdlg-tabs button.on {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.sheet-fmtdlg-body {
+  min-height: 250px;
+}
+.sheet-fmtdlg-num {
+  display: flex;
+  gap: 14px;
+}
+.sheet-fmtdlg-list {
+  display: flex;
+  flex-direction: column;
+  width: 110px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px;
+}
+.sheet-fmtdlg-list button {
+  text-align: left;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.sheet-fmtdlg-list button:hover {
+  background: var(--hover);
+}
+.sheet-fmtdlg-list button.on {
+  background: var(--accent);
+  color: #fff;
+}
+.sheet-fmtdlg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.sheet-fmtdlg-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sheet-fmtdlg-field > .sub {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.sheet-fmtdlg-field > .input,
+.sheet-fmtdlg-field > .ed-select {
+  flex: 1;
+  min-width: 0;
+}
+.sheet-fmtdlg-sample {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 26px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sheet-fmtdlg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.sheet-fmtdlg-borders {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+}
+.sheet-fmtdlg-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.sheet-fmtdlg-color .btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.sheet-fmtdlg-color input[type='color'] {
+  width: 40px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+.sheet-fmtdlg-font {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sheet-fmtdlg-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sheet-fmtdlg-row {
+  display: flex;
+  gap: 4px;
+}
+.sheet-fmtdlg-row .swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  cursor: pointer;
+}
+.sheet-fmtdlg-row .swatch:hover,
+.sheet-fmtdlg-row .swatch.on {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.sheet-fmtdlg-fill {
+  width: 120px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* ---------- 安卓手机版（docs/ANDROID.md §6.3）：.sheet.mobile ---------- */
+.sheet.mobile .sheet-scroll {
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet.mobile .sheet-foot {
+  min-height: 40px;
+}
+.sheet-m {
+  flex: none;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+.sheet-m-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 12px;
+  font-size: 14px;
+}
+.sheet-m-addr {
+  flex: none;
+  min-width: 44px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--accent-text);
+  font-size: 12px;
+  text-align: center;
+}
+.sheet-m-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+.sheet-m-stats {
+  flex: none;
+  font-size: 12px;
+  color: var(--sub);
+}
+.sheet-m-find {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+}
+.sheet-m-find input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  outline: none;
+}
+.sheet-m-find button {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--text);
+}
+.sheet-m-count {
+  min-width: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--sub);
+}
+.sheet-m-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+.sheet-m-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  max-height: 96px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  resize: none;
+  outline: none;
+}
+.sheet-m-input:focus {
+  border-color: var(--accent);
+}
+.sheet-m-ok,
+.sheet-m-x {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  border: none;
+  background: var(--soft);
+  color: var(--accent-text);
+}
+.sheet-m-x {
+  background: none;
+  color: var(--sub);
+}
+.sheet-m-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 10px 6px;
+  border-bottom: 1px solid var(--border);
+  max-height: 46vh;
+  overflow-y: auto;
+}
+.sheet-m-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sheet-m-label {
+  min-width: 34px;
+  font-size: 12px;
+  color: var(--sub);
+}
+.sheet-m-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 2px;
+}
+.sheet-m-chip {
+  min-width: 40px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+}
+.sheet-m-chip.on {
+  border-color: var(--accent);
+  background: var(--soft);
+  color: var(--accent-text);
+}

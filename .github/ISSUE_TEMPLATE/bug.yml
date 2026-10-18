@@ -1,0 +1,43 @@
+name: 问题反馈
+description: 打不开、显示不对、保存后出错、操作异常……
+labels: [bug]
+body:
+  - type: dropdown
+    id: editor
+    attributes:
+      label: 哪个编辑器
+      options:
+        - Word（.docx / .doc）
+        - 表格（.xlsx / .csv）
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 问题类型
+      options:
+        - 文件打不开 / 报错
+        - 显示和 Word / Excel 不一样
+        - 保存后用 Office / WPS 打开报错或内容丢失
+        - 编辑操作不对
+        - 公式计算结果不对
+        - 其它
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 怎么操作的、期望是什么、实际是什么。截图（和 Word / Excel 的对比图）最有帮助。
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: 复现文件
+      description: 把能复现问题的文件拖到这里（GitHub 支持 .docx / .xlsx 附件，.doc / .xls 请先压缩成 .zip）。**请先删掉文件里的敏感信息。**
+  - type: input
+    id: env
+    attributes:
+      label: 浏览器和系统
+      placeholder: 例如 Chrome 130 / Windows 11

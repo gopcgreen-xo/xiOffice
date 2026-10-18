@@ -1,0 +1,27 @@
+{
+  "name": "@wz/sheet",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run --root ../.. editors/sheet/"
+  },
+  "wz": {
+    "kind": "sheet",
+    "label": "表格",
+    "exts": [
+      "xlsx",
+      "xlsm",
+      "xls",
+      "csv"
+    ],
+    "order": 2,
+    "tag": "XLS",
+    "openName": "表格编辑器",
+    "create": {
+      "name": "新建 Excel 工作簿",
+      "title": "新建工作簿.xlsx"
+    }
+  }
+}

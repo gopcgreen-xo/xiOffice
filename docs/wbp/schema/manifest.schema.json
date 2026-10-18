@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:manifest",
+  "title": "WBP 工作包清单 manifest.json",
+  "type": "object",
+  "required": ["format", "version", "id", "items"],
+  "properties": {
+    "format": { "const": "wbp" },
+    "version": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" },
+    "title": { "type": "string", "maxLength": 200 },
+    "generator": { "type": "string", "maxLength": 100 },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "modified": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "items": { "type": "array", "maxItems": 5000, "items": { "$ref": "#/$defs/item" } }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false,
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\\\\/:*?\"<>|\\u0000-\\u001f]+$" },
+        "kind": { "enum": ["sheet", "doc", "md", "html", "board", "script", "file"] },
+        "title": { "type": "string", "maxLength": 200 },
+        "mediaType": { "type": "string", "pattern": "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+$" }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    }
+  }
+}

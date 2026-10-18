@@ -1,0 +1,215 @@
+/* 编辑器和工作台共用的控件样式：下拉框、提示条、查找替换面板（只用主题变量） */
+.ed-select {
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 12px;
+}
+
+.ed-warn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--p-mid-bg);
+  color: var(--p-mid-fg);
+  font-size: 12px;
+}
+/* ---------- 查找替换 ---------- */
+.ed-find {
+  position: absolute;
+  right: 18px;
+  top: 150px;
+  z-index: 30;
+  width: 380px;
+  padding: 10px 12px 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.ed-find-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ed-find-head > button:not(.icon-btn) {
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.ed-find-head > button.on {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent-text);
+  background: var(--soft);
+  font-weight: 600;
+}
+
+.ed-find-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ed-find-row > .sub {
+  width: 44px;
+  flex-shrink: 0;
+}
+.ed-find-row input {
+  flex: 1;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+}
+.ed-find-row input:focus {
+  border-color: var(--accent);
+}
+
+.ed-find-opts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.ed-find-opts .ed-select {
+  height: 26px;
+}
+
+.ed-find-opts label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ed-find-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ed-find-foot .btn {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.ed-find-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding-top: 6px;
+}
+
+.ed-find-list button {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.ed-find-list button:hover {
+  background: var(--hover);
+}
+
+.ed-find-list .mono {
+  flex-shrink: 0;
+  color: var(--accent-text);
+}
+
+/* 工具条上的立体图标按钮：新建 / 打开 / 保存（带下拉）/ 格式刷（Word 和表格编辑器共用） */
+.ed-quick { display: inline-flex; align-items: center; gap: 6px; }
+.ed-raised {
+  border: 1px solid var(--border);
+  background: linear-gradient(to bottom, var(--card), var(--hover));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.ed-raised svg { transition: transform 0.15s ease; }
+.ed-raised:hover { background: linear-gradient(to bottom, var(--card), var(--hover)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.25); }
+.ed-raised:hover svg { transform: translateY(-1.5px) scale(1.1); }
+.ed-raised:active, .ed-raised.on { background: var(--hover); box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25); }
+.ed-raised:active svg { transform: translateY(0.5px) scale(0.95); }
+.ed-raised.dirty { position: relative; }
+.ed-raised.dirty::after { content: ''; position: absolute; top: 2px; right: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.ed-split { position: relative; display: inline-flex; align-items: stretch; }
+.ed-split > .ed-raised:first-child { border-radius: 8px 0 0 8px; }
+.ed-split > .ed-split-arrow { width: 22px; border-radius: 0 8px 8px 0; border-left: 0; }
+.ed-split-chev { transform: rotate(90deg); }
+.ed-split-chev path { stroke-width: 2.4; }
+.ed-raised:hover .ed-split-chev, .ed-raised:active .ed-split-chev { transform: rotate(90deg); }
+.ed-split-menu { position: absolute; top: 100%; left: 0; z-index: 30; min-width: 130px; margin-top: 2px; padding: 4px; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); }
+.ed-split-menu button { text-align: left; padding: 6px 10px; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; white-space: nowrap; }
+.ed-split-menu button:hover { background: var(--hover); }
+@media (prefers-reduced-motion: reduce) { .ed-raised svg { transition: none; } }
+
+/* 工具条上方的标签行：左边标签 + 立体快捷按钮，右边常驻按钮 */
+.ed-tabbar { display: flex; align-items: center; gap: 4px; padding: 2px 8px 0; border-bottom: 1px solid var(--border); }
+.ed-tabbar .grow { flex: 1; }
+.ed-tabs { display: flex; gap: 2px; }
+.ed-tabs button { padding: 5px 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: inherit; cursor: pointer; }
+.ed-tabs button.on { border-bottom-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+.ed-quick-tab { margin-left: 10px; padding-bottom: 2px; }
+.ed-tabbar-right { display: flex; align-items: center; gap: 4px; padding-bottom: 2px; }
+
+/* 手机版（docs/ANDROID.md §5.2）底部工具条：可横向滑动，按钮 = 图标 + 两个字；编辑器和手机外壳共用 */
+.m-toolbar {
+  flex: none;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+.m-tool {
+  flex: none;
+  min-width: 60px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--sub);
+  background: none;
+  border: none;
+  padding: 0;
+}
+.m-tool.on {
+  color: var(--accent-text);
+}
+.m-tool:active {
+  background: var(--hover);
+}
+.m-tool:disabled {
+  opacity: 0.4;
+}
+.m-tool-glyph {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+}

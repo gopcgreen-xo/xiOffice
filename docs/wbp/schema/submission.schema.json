@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:submission",
+  "title": "WBP 表单提交记录 forms/<表单id>.log.jsonl 的一行",
+  "type": "object",
+  "required": ["t", "row", "values"],
+  "properties": {
+    "t": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "user": { "type": "string", "maxLength": 100 },
+    "row": { "type": "integer", "minimum": 1 },
+    "mode": { "enum": ["new", "edit"] },
+    "values": { "type": "object", "additionalProperties": { "type": "string" } }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wz:wbp:1:flow",
+  "title": "WBP 联动流程 flows/<流程id>.json",
+  "type": "object",
+  "required": ["id", "title", "steps"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+    "title": { "type": "string", "maxLength": 100 },
+    "description": { "type": "string", "maxLength": 500 },
+    "steps": { "type": "array", "maxItems": 30, "items": { "$ref": "#/$defs/step" } }
+  },
+  "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+  "additionalProperties": false,
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "enum": ["form", "open", "script"] },
+        "ref": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,40}$" },
+        "label": { "type": "string", "maxLength": 100 },
+        "args": { "type": "object", "maxProperties": 50, "additionalProperties": { "type": "string", "maxLength": 2000 } }
+      },
+      "patternProperties": { "^x-[A-Za-z0-9_.-]{1,60}$": {} },
+      "additionalProperties": false
+    }
+  }
+}

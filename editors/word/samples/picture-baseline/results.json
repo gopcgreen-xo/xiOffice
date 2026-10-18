@@ -1,0 +1,51 @@
+[
+  {
+    "case": "inline",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "crop",
+    "width": 104.0,
+    "height": 56.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "rotate90",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "rotate30",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "flip",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "square",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  },
+  {
+    "case": "top-bottom",
+    "width": 120.0,
+    "height": 60.0,
+    "wordVersion": "16.0",
+    "wordBuild": "16.0.4266"
+  }
+]
