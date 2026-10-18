@@ -22,5 +22,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts', 'editors/{word,sheet,shared}/**/*.test.ts'],
+    // CI 的 2 核机器上并行跑压力测试（如 2000 层嵌套表格）会超过默认的 5 秒
+    testTimeout: 30_000,
   },
 });
