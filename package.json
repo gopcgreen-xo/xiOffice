@@ -2,26 +2,23 @@
   "name": "xioffice",
   "private": true,
   "version": "0.1.0",
-  "description": "在浏览器里运行的 Word / Excel 编辑器（docx、xlsx 读写，纯前端）",
+  "description": "Word / Excel 桌面编辑器：读写 docx、xlsx（Electron）",
   "type": "module",
   "workspaces": [
     "editors/*"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite",
     "build": "tsc --noEmit && vite build",
+    "start": "vite build && electron .",
+    "dist": "tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "dev:word": "vite --config editors/word/dev/vite.config.ts",
     "dev:sheet": "vite --config editors/sheet/dev/vite.config.ts",
     "gen:sample": "cross-env GEN_SAMPLE=1 vitest run editors/word/src/core/sample.test.ts"
-  },
-  "dependencies": {
-    "fflate": "^0.8.3",
-    "pdf-lib": "^1.17.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
@@ -30,10 +27,62 @@
     "@vitejs/plugin-react": "^4.7.0",
     "@xmldom/xmldom": "^0.8.11",
     "cross-env": "^7.0.3",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
     "jsdom": "^25.0.1",
     "pdfjs-dist": "^4.10.38",
     "typescript": "^5.9.3",
     "vite": "^6.4.3",
-    "vitest": "^3.2.7"
+    "vitest": "^3.2.7",
+    "fflate": "^0.8.3",
+    "pdf-lib": "^1.17.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "main": "electron/main.cjs",
+  "productName": "xiOffice",
+  "author": "freesun",
+  "build": {
+    "appId": "io.github.gopcgreen-xo.xioffice",
+    "productName": "xiOffice",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "docx",
+          "doc",
+          "dot"
+        ],
+        "name": "Word 文档"
+      },
+      {
+        "ext": [
+          "xlsx",
+          "xlsm",
+          "csv"
+        ],
+        "name": "Excel 工作簿"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

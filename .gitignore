@@ -4,3 +4,4 @@ dist
 .DS_Store
 # 排版对照的临时数据（Word 导出的 PDF 等）
 editors/word/tools/data/
+release

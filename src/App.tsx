@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState, type ComponentType, type DragEvent } from 'react';
 import type { EditorTab } from '@wz/editor-shared';
-import { DIR, EDITORS, chooseFiles, closeTab, newDocument, openFiles } from './host';
+import { DIR, EDITORS, chooseAndOpen, closeTab, newDocument, openFiles } from './host';
+import { desktop } from './desktop';
 import { openTab, setState, useStore, type Dialog, type Kind } from './store';
 import sampleLayout from '../editors/word/samples/排版对照样例.docx?url';
 import sampleWord from '../editors/word/samples/Word生成的综合样本.docx?url';
@@ -25,7 +26,6 @@ async function openSample(name: string, url: string) {
   await openFiles([new File([data], name)]);
 }
 
-const ALL_EXTS = EDITORS.flatMap((e) => e.exts);
 
 export function App() {
   const tabs = useStore((s) => s.tabs);
@@ -70,7 +70,7 @@ export function App() {
         <div className="xo-actions">
           <button className="btn" onClick={() => newDocument('word')}>新建文档</button>
           <button className="btn" onClick={() => newDocument('sheet')}>新建表格</button>
-          <button className="btn primary" onClick={async () => openFiles(await chooseFiles(ALL_EXTS))}>
+          <button className="btn primary" onClick={() => void chooseAndOpen()}>
             打开文件
           </button>
         </div>
@@ -99,7 +99,7 @@ function Home() {
   return (
     <div className="xo-home">
       <h1>xiOffice</h1>
-      <p className="xo-sub">在浏览器里编辑 Word（.docx / .doc）和 Excel（.xlsx / .csv），文件不离开本机。</p>
+      <p className="xo-sub">编辑 Word（.docx / .doc）和 Excel（.xlsx / .csv），文件不离开本机。</p>
       <div className="xo-cards">
         {EDITORS.map((e) => (
           <button key={e.kind} className="xo-card" onClick={() => newDocument(e.kind)}>
@@ -108,7 +108,7 @@ function Home() {
             <span className="xo-sub">支持 {e.exts.map((x) => `.${x}`).join(' ')}</span>
           </button>
         ))}
-        <button className="xo-card" onClick={async () => openFiles(await chooseFiles(ALL_EXTS))}>
+        <button className="xo-card" onClick={() => void chooseAndOpen()}>
           <span className="xo-badge big open">↑</span>
           <strong>打开本机文件</strong>
           <span className="xo-sub">也可以直接把文件拖进窗口</span>
@@ -123,7 +123,13 @@ function Home() {
         ))}
       </div>
       <p className="xo-note">
-        保存（Ctrl+S）会把文件下载到本机；文件只保存在这个页面的内存里（虚拟文件夹 <code>{DIR}</code>），刷新页面后需要重新打开。
+        {desktop ? (
+          <>保存（Ctrl+S）直接写回原文件；新建的文件和示例第一次保存时选择保存位置。</>
+        ) : (
+          <>
+            浏览器版：保存（Ctrl+S）会把文件下载到本机；文件只保存在这个页面的内存里（虚拟文件夹 <code>{DIR}</code>），刷新页面后需要重新打开。
+          </>
+        )}
         <br />
         遇到打不开、排版不对、保存后 Office 报错等问题，欢迎 <a href={ISSUES} target="_blank" rel="noreferrer">提交 Issue</a>，最好附上能复现问题的文件（请先去掉敏感内容）。
       </p>

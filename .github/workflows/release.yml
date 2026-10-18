@@ -1,0 +1,36 @@
+name: Release
+
+# 推送版本标签（如 v0.2.0）时：三个平台各打一个安装包，上传到同名的 GitHub Release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # 不签名、不自动发布，产物由下一步上传
+      - run: npm run dist -- --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage

@@ -35,11 +35,13 @@ export function setState(patch: Partial<State> | ((s: State) => Partial<State>))
   subs.forEach((f) => f());
 }
 
+export function subscribe(cb: () => void): () => void {
+  subs.add(cb);
+  return () => void subs.delete(cb);
+}
+
 export function useStore<T>(pick: (s: State) => T): T {
-  return useSyncExternalStore(
-    (cb) => (subs.add(cb), () => void subs.delete(cb)),
-    () => pick(state),
-  );
+  return useSyncExternalStore(subscribe, () => pick(state));
 }
 
 let seq = 0;
